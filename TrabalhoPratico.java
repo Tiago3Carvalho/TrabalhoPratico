@@ -15,7 +15,7 @@ public class TrabalhoPratico {
         System.out.println();
         System.out.println("c)");
         obterMA (temperaturas, L, C);
-        int[][] temperaturasAposVariacao10GrausNeg = matrizAposVariação10GrausNeg(temperaturas);
+        int[][] temperaturasAposVariacao10GrausNeg = matrizAposVariacao10GrausNeg(temperaturas);
         System.out.println();
         System.out.println("d)");
         visualizarMT (temperaturasAposVariacao10GrausNeg);
@@ -29,10 +29,13 @@ public class TrabalhoPratico {
         tudoCatastrofico (temperaturasAposVariacao10GrausNeg);
         System.out.println();
         System.out.println("g)");
-        int[][] temperaturasAposVariacao10GrausPos = matrizAposVariação10GrausPos(temperaturasAposVariacao10GrausNeg);
-        String[][] alertas = obterMA (temperaturasAposVariacao10GrausPos, L, C);
+        int[][] temperaturasAposVariacao10GrausPos = matrizAposVariacao10GrausPos(temperaturasAposVariacao10GrausNeg);
+        String[][] alertasAposVariacao10GrausPos = obterMA (temperaturasAposVariacao10GrausPos, L, C);
         System.out.println();
-        percentagemAlertasAposVariacao10GrausPos (temperaturasAposVariacao10GrausPos, alertas, alertasAposVariacao10GrausNeg);
+        percentagemAlertasAposVariacao10GrausPos (temperaturasAposVariacao10GrausPos, alertasAposVariacao10GrausPos, alertasAposVariacao10GrausNeg);
+        System.out.println();
+        System.out.println ("h)");
+        String[][] alertasAposAgravamentoVento = obterMAAposAgravamentoVento (temperaturasAposVariacao10GrausPos, L, C, alertasAposVariacao10GrausPos);
     }
 
     private static int[][] criarEPreencherMatriz(int L, int C) {
@@ -48,7 +51,7 @@ public class TrabalhoPratico {
         return matriz;
     }
 
-    private static int[][] matrizAposVariação10GrausNeg (int[][] temperaturas) {
+    private static int[][] matrizAposVariacao10GrausNeg (int[][] temperaturas) {
         int[][] matriz = temperaturas;
         for (int i = 0; i < matriz.length; i++) {
             for (int j = 0; j < matriz[i].length; j++) {
@@ -58,7 +61,7 @@ public class TrabalhoPratico {
         return matriz;
     }
 
-    private static int[][] matrizAposVariação10GrausPos (int[][] temperaturas) {
+    private static int[][] matrizAposVariacao10GrausPos (int[][] temperaturas) {
         int[][] matriz = temperaturas;
         for (int i = 0; i < matriz.length; i++) {
             for (int j = 0; j < matriz[i].length; j++) {
@@ -98,6 +101,23 @@ public class TrabalhoPratico {
             System.out.println();
         }
         return alerta;
+    }
+
+    private static String[][] obterMAAposAgravamentoVento(int[][] temperaturasAposVariacao10GrausPos, int L, int C, String[][] alertaAposVariacao10GrausPos) {
+        String[][] alertaAposAgravamentoVento = new String[L][C];
+        for (int i = 1; i < temperaturasAposVariacao10GrausPos.length; i++) {
+            for (int j = 0; j < temperaturasAposVariacao10GrausPos[i].length; i++) {
+                alertaAposAgravamentoVento[0][j] = alertaAposVariacao10GrausPos[0][j];
+                if (alertaAposVariacao10GrausPos[i-1][j].equals("C")) {
+                    alertaAposAgravamentoVento[i][j] = "C";
+                } else {
+                    alertaAposAgravamentoVento[i][j] = alertaAposVariacao10GrausPos[i][j];
+                }
+                System.out.println(alertaAposAgravamentoVento[i][j]);
+            }
+            System.out.println();
+        }
+        return alertaAposAgravamentoVento;
     }
 
     private static void percentagemAlertasAposVariacao10GrausNeg (int[][] temperaturasAposVariacao, String[][] alertasAposVariacao10GrausNeg) {
@@ -148,7 +168,7 @@ public class TrabalhoPratico {
         int contAlertasAlterados = 0, somaAlertas = 0;
         for (int i = 0; i < temperaturas.length; i++) {
             for (int j = 0; j < temperaturas[i].length; j++) {
-                if (alertas[i][j] != alertasAposVariacao10GrausNeg[i][j]) {
+                if (!(alertas[i][j].equals(alertasAposVariacao10GrausNeg[i][j]))) {
                     contAlertasAlterados++;
                 }
                 somaAlertas ++;
