@@ -189,19 +189,32 @@ public class TrabalhoPratico {
     private static void largarAgua(int[][] temperaturas, String[][] alertaTemperaturasIniciais) {
         visualizarMT(temperaturas);
         System.out.println();
-        int[] primeiroMaior50 = new int[2];
         int[] norteOesteMaior50 = new int[2];
+        boolean primeiro50 = false;
         for (int i = 0; i < temperaturas.length; i++) {
             for (int j = 0; j < temperaturas[i].length; j++) {
-                if (temperaturas[i][j] > 50) {
-                    primeiroMaior50[0] = i;
-                    primeiroMaior50[1] = j;
-                }
-                if (temperaturas[i][j] > 50 && i + j < primeiroMaior50[0] + primeiroMaior50[1]) {
+                if (temperaturas[i][j] > 50 && !primeiro50) {
                     norteOesteMaior50[0] = i;
                     norteOesteMaior50[1] = j;
+                    primeiro50 = true;
+                }
+                if (temperaturas[i][j] > 50 && i + j < norteOesteMaior50[0] + norteOesteMaior50[1]) {
+                    if (i > 0) {
+                        norteOesteMaior50[0] = i;
+                        norteOesteMaior50[1] = j;
+                    }
                 }
             }
+        }
+        if (norteOesteMaior50[0] == 0) {
+            norteOesteMaior50[0] += 1;
+        } else if (norteOesteMaior50[0] > 1) {
+            norteOesteMaior50[0] -= 1;
+        }
+        if (norteOesteMaior50[1] == 0) {
+            norteOesteMaior50[1] += 1;
+        } else if (norteOesteMaior50[1] > 1) {
+            norteOesteMaior50[1] -= 1;
         }
         System.out.println ("drop water at (" + norteOesteMaior50[0] + " , " + norteOesteMaior50[1] + ")");
     }
