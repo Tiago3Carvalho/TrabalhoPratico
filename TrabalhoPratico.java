@@ -14,7 +14,7 @@ public class TrabalhoPratico {
         visualizarMT (temperaturas);
         System.out.println();
         System.out.println("c)");
-        obterMA (temperaturas, L, C);
+        String[][] alertaTemperaturasIniciais = obterMA (temperaturas, L, C);
         int[][] temperaturasAposVariacao10GrausNeg = matrizAposVariacao10GrausNeg(temperaturas);
         System.out.println();
         System.out.println("d)");
@@ -36,6 +36,12 @@ public class TrabalhoPratico {
         System.out.println();
         System.out.println ("h)");
         String[][] alertasAposAgravamentoVento = obterMAAposAgravamentoVento (temperaturasAposVariacao10GrausPos, L, C, alertasAposVariacao10GrausPos);
+        System.out.println();
+        System.out.println ("i)");
+        largarAgua (temperaturas, alertaTemperaturasIniciais);
+        System.out.println();
+        System.out.println ("j)");
+        colunaSegura (alertasAposVariacao10GrausPos, C);
     }
 
     private static int[][] criarEPreencherMatriz(int L, int C) {
@@ -105,15 +111,18 @@ public class TrabalhoPratico {
 
     private static String[][] obterMAAposAgravamentoVento(int[][] temperaturasAposVariacao10GrausPos, int L, int C, String[][] alertaAposVariacao10GrausPos) {
         String[][] alertaAposAgravamentoVento = new String[L][C];
-        for (int i = 1; i < temperaturasAposVariacao10GrausPos.length; i++) {
-            for (int j = 0; j < temperaturasAposVariacao10GrausPos[i].length; i++) {
-                alertaAposAgravamentoVento[0][j] = alertaAposVariacao10GrausPos[0][j];
-                if (alertaAposVariacao10GrausPos[i-1][j].equals("C")) {
-                    alertaAposAgravamentoVento[i][j] = "C";
+        for (int i = 0; i < alertaAposAgravamentoVento[0].length; i++) {
+            System.out.print (alertaAposVariacao10GrausPos[0][i]);
+        }
+        System.out.println();
+        for (int j = 1; j < alertaAposAgravamentoVento.length; j++) {
+            for (int k = 0; k < alertaAposAgravamentoVento[j].length; k++) {
+                if (alertaAposVariacao10GrausPos[j-1][k].equals("C")) {
+                    alertaAposAgravamentoVento[j][k] = "C";
                 } else {
-                    alertaAposAgravamentoVento[i][j] = alertaAposVariacao10GrausPos[i][j];
+                    alertaAposAgravamentoVento[j][k] = alertaAposVariacao10GrausPos[j][k];
                 }
-                System.out.println(alertaAposAgravamentoVento[i][j]);
+                System.out.print(alertaAposAgravamentoVento[j][k]);
             }
             System.out.println();
         }
@@ -175,5 +184,45 @@ public class TrabalhoPratico {
             }
         }
         System.out.printf ("Alert Levels changes due to temperature variations by 10ºC : " + "%.2f%%", (double) contAlertasAlterados * 100 / somaAlertas);
+    }
+
+    private static void largarAgua(int[][] temperaturas, String[][] alertaTemperaturasIniciais) {
+        visualizarMT(temperaturas);
+        System.out.println();
+        int[] primeiroMaior50 = new int[2];
+        int[] norteOesteMaior50 = new int[2];
+        for (int i = 0; i < temperaturas.length; i++) {
+            for (int j = 0; j < temperaturas[i].length; j++) {
+                if (temperaturas[i][j] > 50) {
+                    primeiroMaior50[0] = i;
+                    primeiroMaior50[1] = j;
+                }
+                if (temperaturas[i][j] > 50 && i + j < primeiroMaior50[0] + primeiroMaior50[1]) {
+                    norteOesteMaior50[0] = i;
+                    norteOesteMaior50[1] = j;
+                }
+            }
+        }
+        System.out.println ("drop water at (" + norteOesteMaior50[0] + " , " + norteOesteMaior50[1] + ")");
+    }
+
+    private static void colunaSegura(String[][] alertasAposVariacao10GrausPos, int C) {
+        int coluna = -1, contC = 0;
+        for (int i = 0; i < alertasAposVariacao10GrausPos[0].length; i++) {
+            contC = 0;
+            for (int j = 0; j < alertasAposVariacao10GrausPos.length; j++) {
+                if (alertasAposVariacao10GrausPos[j][i] == "C") {
+                    contC ++;
+                }
+            }
+            if (contC == 0) {
+                coluna = i;
+            }
+        }
+        if (coluna < 0) {
+            System.out.println("safe column = NONE");
+        } else {
+            System.out.println("safe column = (" + coluna + ")");
+        }
     }
 }
