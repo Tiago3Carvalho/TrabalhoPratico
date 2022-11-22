@@ -183,7 +183,7 @@ public class TrabalhoPratico {
                 somaAlertas ++;
             }
         }
-        System.out.printf ("Alert Levels changes due to temperature variations by 10ºC : " + "%.2f%%", (double) contAlertasAlterados * 100 / somaAlertas);
+        System.out.printf ("Alert Levels changes due to temperature variations by 10ºC : " + "%.2f%%%n", (double) contAlertasAlterados * 100 / somaAlertas);
     }
 
     private static void largarAgua(int[][] temperaturas, String[][] alertaTemperaturasIniciais) {
