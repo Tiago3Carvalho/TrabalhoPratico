@@ -1,15 +1,17 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class TrabalhoPratico {
-    static Scanner ler = new Scanner(System.in);
-    public static void main (String[] args) {
-        String terrenoDataHora = ler.nextLine();
-        String[] infos = terrenoDataHora.split("; ");
-        String linhasColunas = ler.nextLine();
+    public static void main (String[] args) throws FileNotFoundException {
+        File file = new File("c:/Users/tiago/IdeaProjects/APROG_LEI_1DF_1221141_1221124/inputTrabalhoPratico.txt");
+        Scanner ler1 = new Scanner(file);
+        String infos = ler1.nextLine();
+        String linhasColunas = ler1.nextLine();
         String[] LC = linhasColunas.split(" ");
         int L = Integer.parseInt (LC[0]);
         int C = Integer.parseInt (LC[1]);
-        int[][] temperaturas = criarEPreencherMatriz(L, C);
+        int[][] temperaturas = criarEPreencherMatriz(L, C, file);
         System.out.println("b)");
         visualizarMT (temperaturas);
         System.out.println("c)");
@@ -24,7 +26,7 @@ public class TrabalhoPratico {
         tudoCatastrofico (temperaturasAposVariacao10GrausNeg);
         System.out.println("g)");
         int[][] temperaturasAposVariacao10GrausPos = matrizAposVariacao10GrausPos(temperaturasAposVariacao10GrausNeg);
-        String[][] alertasAposVariacao10GrausPos = obterMA (temperaturasAposVariacao10GrausPos);;
+        String[][] alertasAposVariacao10GrausPos = obterMA (temperaturasAposVariacao10GrausPos);
         percentagemAlertasAposVariacao10GrausPos (temperaturasAposVariacao10GrausPos, alertasAposVariacao10GrausPos, alertasAposVariacao10GrausNeg);
         System.out.println ("h)");
         obterMAAposAgravamentoVento (alertasAposVariacao10GrausPos);
@@ -32,18 +34,23 @@ public class TrabalhoPratico {
         largarAgua (temperaturas);
         System.out.println ("j)");
         colunaSegura (alertasAposVariacao10GrausPos);
+        ler1.close();
     }
 
-    private static int[][] criarEPreencherMatriz(int L, int C) {
+    private static int[][] criarEPreencherMatriz(int L, int C, File file) throws FileNotFoundException {
         int[][] matriz = new int[L][C];
+        Scanner ler2 = new Scanner(file);
+        ler2.nextLine();
+        ler2.nextLine();
         for (int i = 0; i < matriz.length; i++) {
-            String temperaturasL = ler.nextLine();
+            String temperaturasL = ler2.nextLine();
             String[] temperaturasC = temperaturasL.split(" ");
             for (int j = 0; j < matriz[i].length; j++) {
                 int temperatura = Integer.parseInt(temperaturasC[j]);
                 matriz[i][j] = temperatura;
             }
         }
+        ler2.close();
         return matriz;
     }
 
