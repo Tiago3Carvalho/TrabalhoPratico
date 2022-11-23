@@ -3,15 +3,23 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class TrabalhoPratico {
+    static File file = new File("c:/Users/tiago/IdeaProjects/APROG_LEI_1DF_1221141_1221124/inputTrabalhoPratico.txt");
+    static Scanner ler;
+    static {
+        try {
+            ler = new Scanner(file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main (String[] args) throws FileNotFoundException {
-        File file = new File("c:/Users/tiago/IdeaProjects/APROG_LEI_1DF_1221141_1221124/inputTrabalhoPratico.txt");
-        Scanner ler1 = new Scanner(file);
-        String infos = ler1.nextLine();
-        String linhasColunas = ler1.nextLine();
+        ler.nextLine();
+        String linhasColunas = ler.nextLine();
         String[] LC = linhasColunas.split(" ");
         int L = Integer.parseInt (LC[0]);
         int C = Integer.parseInt (LC[1]);
-        int[][] temperaturas = criarEPreencherMatriz(L, C, file);
+        int[][] temperaturas = criarEPreencherMatriz(L, C);
         System.out.println("b)");
         visualizarMT (temperaturas);
         System.out.println("c)");
@@ -34,23 +42,19 @@ public class TrabalhoPratico {
         largarAgua (temperaturas);
         System.out.println ("j)");
         colunaSegura (alertasAposVariacao10GrausPos);
-        ler1.close();
+        ler.close();
     }
 
-    private static int[][] criarEPreencherMatriz(int L, int C, File file) throws FileNotFoundException {
+    private static int[][] criarEPreencherMatriz(int L, int C) throws FileNotFoundException {
         int[][] matriz = new int[L][C];
-        Scanner ler2 = new Scanner(file);
-        ler2.nextLine();
-        ler2.nextLine();
         for (int i = 0; i < matriz.length; i++) {
-            String temperaturasL = ler2.nextLine();
+            String temperaturasL = ler.nextLine();
             String[] temperaturasC = temperaturasL.split(" ");
             for (int j = 0; j < matriz[i].length; j++) {
                 int temperatura = Integer.parseInt(temperaturasC[j]);
                 matriz[i][j] = temperatura;
             }
         }
-        ler2.close();
         return matriz;
     }
 
