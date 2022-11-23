@@ -12,34 +12,24 @@ public class TrabalhoPratico {
         int[][] temperaturas = criarEPreencherMatriz(L, C);
         System.out.println("b)");
         visualizarMT (temperaturas);
-        System.out.println();
         System.out.println("c)");
-        obterMA (temperaturas, L, C);
+        obterMA (temperaturas);
         int[][] temperaturasAposVariacao10GrausNeg = matrizAposVariacao10GrausNeg(temperaturas);
-        System.out.println();
         System.out.println("d)");
         visualizarMT (temperaturasAposVariacao10GrausNeg);
-        System.out.println();
-        String[][] alertasAposVariacao10GrausNeg = obterMA (temperaturasAposVariacao10GrausNeg, L, C);
-        System.out.println();
+        String[][] alertasAposVariacao10GrausNeg = obterMA (temperaturasAposVariacao10GrausNeg);
         System.out.println("e)");
         percentagemAlertasAposVariacao10GrausNeg (temperaturasAposVariacao10GrausNeg, alertasAposVariacao10GrausNeg);
-        System.out.println();
         System.out.println("f)");
         tudoCatastrofico (temperaturasAposVariacao10GrausNeg);
-        System.out.println();
         System.out.println("g)");
         int[][] temperaturasAposVariacao10GrausPos = matrizAposVariacao10GrausPos(temperaturasAposVariacao10GrausNeg);
-        String[][] alertasAposVariacao10GrausPos = obterMA (temperaturasAposVariacao10GrausPos, L, C);
-        System.out.println();
+        String[][] alertasAposVariacao10GrausPos = obterMA (temperaturasAposVariacao10GrausPos);;
         percentagemAlertasAposVariacao10GrausPos (temperaturasAposVariacao10GrausPos, alertasAposVariacao10GrausPos, alertasAposVariacao10GrausNeg);
-        System.out.println();
         System.out.println ("h)");
-        obterMAAposAgravamentoVento (temperaturasAposVariacao10GrausPos, L, C, alertasAposVariacao10GrausPos);
-        System.out.println();
+        obterMAAposAgravamentoVento (alertasAposVariacao10GrausPos);
         System.out.println ("i)");
         largarAgua (temperaturas);
-        System.out.println();
         System.out.println ("j)");
         colunaSegura (alertasAposVariacao10GrausPos);
     }
@@ -77,17 +67,18 @@ public class TrabalhoPratico {
         return matriz;
     }
 
-    public static void visualizarMT (int[][] temperaturas){
+    public static void visualizarMT (int[][] temperaturas) {
         for(int i = 0; i < temperaturas.length; i++) {
             for(int j = 0; j < temperaturas[i].length ; j++) {
                 System.out.printf ("%4d", temperaturas[i][j]);
             }
             System.out.println();
         }
+        System.out.println();
     }
 
-    private static String[][] obterMA (int[][] temperaturas, int L, int C) {
-        String[][] alerta = new String[L][C];
+    private static String[][] obterMA (int[][] temperaturas) {
+        String[][] alerta = new String[temperaturas.length][temperaturas[0].length];
         for (int i = 0; i < temperaturas.length; i++) {
             for (int j = 0; j < temperaturas[i].length; j++) {
                 if (temperaturas[i][j] < 20) {
@@ -106,13 +97,14 @@ public class TrabalhoPratico {
             }
             System.out.println();
         }
+        System.out.println();
         return alerta;
     }
 
-    private static void obterMAAposAgravamentoVento(int[][] temperaturasAposVariacao10GrausPos, int L, int C, String[][] alertaAposVariacao10GrausPos) {
-        String[][] alertaAposAgravamentoVento = new String[L][C];
-        for (int i = 0; i < temperaturasAposVariacao10GrausPos[0].length; i++) {
-            System.out.print (temperaturasAposVariacao10GrausPos[0][i]);
+    private static void obterMAAposAgravamentoVento(String[][] alertaAposVariacao10GrausPos) {
+        String[][] alertaAposAgravamentoVento = new String[alertaAposVariacao10GrausPos.length][alertaAposVariacao10GrausPos[0].length];
+        for (int i = 0; i < alertaAposVariacao10GrausPos[0].length; i++) {
+            System.out.print(alertaAposVariacao10GrausPos[0][i]);
         }
         System.out.println();
         for (int j = 1; j < alertaAposAgravamentoVento.length; j++) {
@@ -126,6 +118,7 @@ public class TrabalhoPratico {
             }
             System.out.println();
         }
+        System.out.println();
     }
 
     private static void percentagemAlertasAposVariacao10GrausNeg (int[][] temperaturasAposVariacao, String[][] alertasAposVariacao10GrausNeg) {
@@ -157,6 +150,7 @@ public class TrabalhoPratico {
         System.out.printf ("%7.2f%%%n", (double) contE * 100 / somaAlertas);
         System.out.printf ("CATASTROPHIC" + "%2s", ":");
         System.out.printf ("%7.2f%%%n", (double) contC * 100 / somaAlertas);
+        System.out.println();
     }
 
     private static void tudoCatastrofico(int[][] temperaturasAposVariacao) {
@@ -170,6 +164,7 @@ public class TrabalhoPratico {
         }
         int temp = 40 - menorValor;
         System.out.println ("To get all terrain on CATASTROPHIC alert, the temperature has to rise : " + temp + "ºC");
+        System.out.println();
     }
 
     private static void percentagemAlertasAposVariacao10GrausPos(int[][] temperaturas, String[][] alertas, String[][] alertasAposVariacao10GrausNeg) {
@@ -183,11 +178,11 @@ public class TrabalhoPratico {
             }
         }
         System.out.printf ("Alert Levels changes due to temperature variations by 10ºC : " + "%.2f%%%n", (double) contAlertasAlterados * 100 / somaAlertas);
+        System.out.println();
     }
 
     private static void largarAgua(int[][] temperaturas) {
         visualizarMT(temperaturas);
-        System.out.println();
         int[] norteOesteMaior50 = new int[2];
         boolean primeiro50 = false;
         for (int i = 0; i < temperaturas.length; i++) {
@@ -216,6 +211,7 @@ public class TrabalhoPratico {
             norteOesteMaior50[1] -= 1;
         }
         System.out.println ("drop water at (" + norteOesteMaior50[0] + " , " + norteOesteMaior50[1] + ")");
+        System.out.println();
     }
 
     private static void colunaSegura(String[][] alertasAposVariacao10GrausPos) {
