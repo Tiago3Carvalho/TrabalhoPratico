@@ -9,6 +9,7 @@ public class TrabalhoPratico {
         try {
             ler = new Scanner(file);
         } catch (FileNotFoundException e) {
+            System.out.println("Error: file not found.");
             throw new RuntimeException(e);
         }
     }
