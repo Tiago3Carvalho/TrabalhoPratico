@@ -201,29 +201,12 @@ public class TrabalhoPratico {
         for (int i = 1; i < temperaturas.length - 1; i++) {
             for (int j = 1; j < temperaturas[i].length - 1; j++) {
                 somaMaior50AVolta = 0;
-                if (temperaturas[i - 1][j - 1] > 50) {
-                    somaMaior50AVolta += 1;
-                }
-                if (temperaturas[i - 1][j] > 50) {
-                    somaMaior50AVolta += 1;
-                }
-                if (temperaturas[i - 1][j + 1] > 50) {
-                    somaMaior50AVolta += 1;
-                }
-                if (temperaturas[i][j - 1] > 50) {
-                    somaMaior50AVolta += 1;
-                }
-                if (temperaturas[i][j + 1] > 50) {
-                    somaMaior50AVolta += 1;
-                }
-                if (temperaturas[i + 1][j - 1] > 50) {
-                    somaMaior50AVolta += 1;
-                }
-                if (temperaturas[i + 1][j] > 50) {
-                    somaMaior50AVolta += 1;
-                }
-                if (temperaturas[i + 1][j + 1] > 50) {
-                    somaMaior50AVolta += 1;
+                for (int k = i - 1; k <= i + 1; k++) {
+                    for (int l = j - 1; l <= j + 1; l++) {
+                        if (temperaturas[k][l] > 50 && !(k == i && l == j)) {
+                            somaMaior50AVolta += 1;
+                        }
+                    }
                 }
                 if (somaMaior50AVolta > maiorSoma) {
                     maiorSoma = somaMaior50AVolta;
