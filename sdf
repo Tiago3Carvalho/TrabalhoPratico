@@ -1,0 +1,381 @@
+import java.io.*;
+import java.util.Scanner;
+import java.lang.Runtime;
+public class Main {
+    static Scanner read = new Scanner(System.in);
+    static File interactiveFile = new File("ficheiroSIR.csv");
+    static double alpha;
+    static double beta;
+    static double gamma;
+    static double rho;
+    static double h;
+    static int option;
+    static String chosenName;
+    static int numberOfDays;
+    static int initialPopulationSize;
+    static int initialSusceptible;
+    static int initialInfected;
+    static int initialRecovered;
+
+    public static void main(String[] args) throws FileNotFoundException {
+        boolean interactive;
+        if (args.length > 0) {
+            interactive = false;
+            File nonInteractiveFile = new File(args[0]);
+            nonInteractiveProgram(nonInteractiveFile, args, interactive);
+        } else {
+            interactive = true;
+            String[] names = scanFileNames(interactiveFile);
+            interactiveProgram(interactiveFile, names, args, interactive);
+        }
+        comandos();
+    }
+
+    public static void interactiveProgram(File interactiveFile, String[] names, String[] args, boolean interactive) throws FileNotFoundException {
+        double[][] matrix = scanFileValues(interactiveFile, names);
+        interactiveQuestions(names);
+        int chosenLine = readChosenLine(names);
+        while (chosenLine < 0) {
+            chosenName = read.nextLine();
+            chosenLine = readChosenLine(names);
+        }
+        ;
+        beta = matrix[chosenLine][1];
+        gamma = matrix[chosenLine][2];
+        rho = matrix[chosenLine][3];
+        alpha = matrix[chosenLine][4];
+        program(names, args, chosenLine, interactive);
+    }
+
+    public static void nonInteractiveProgram(File nonInteractiveFile, String[] args, boolean interactive) throws FileNotFoundException {
+        String[] names = scanFileNames(nonInteractiveFile);
+        double[][] matrix = scanFileValues(nonInteractiveFile, names);
+        readNIMethod(args);
+        readNIh(args);
+        readNIpopulationSize(args);
+        readNInumberOfDays(args);
+        for (int i = 0; i < names.length; i++) {
+            beta = matrix[i][1];
+            gamma = matrix[i][2];
+            rho = matrix[i][3];
+            alpha = matrix[i][4];
+            program(names, args, i, interactive);
+        }
+    }
+
+    public static void program(String[] names, String[] args, int i, boolean interactive) throws FileNotFoundException {
+        initialSusceptible = initialPopulationSize - 1;
+        initialInfected = 1;
+        initialRecovered = 0;
+        double[][] matrixEuler = Euler();
+        double[][] matrixRK4 = RK4();
+        outputToCsvFile(creatingOutputArray(choosingMethod(option), matrixEuler, matrixRK4, names, args, i, interactive), names, args, i, interactive);
+    }
+
+    public static void interactiveQuestions(String[] names) {
+        System.out.println("Qual é o tamanho da população em estudo?");
+        initialPopulationSize = read.nextInt();
+        while (initialPopulationSize < 1) {
+            System.out.println("Por favor, insira um número válido.");
+            initialPopulationSize = read.nextInt();
+        }
+        System.out.println("Durante quantos dias pretende saber a evolução das variáveis do modelo?");
+        numberOfDays = read.nextInt();
+        while (numberOfDays < 1) {
+            System.out.println("Por favor, insira um número válido.");
+            numberOfDays = read.nextInt();
+        }
+        System.out.println("Qual o passo de integração a usar?");
+        h = read.nextFloat();
+        while (h <= 0 || h >= 1) {
+            System.out.println("Por favor, insira um número válido.");
+            h = read.nextFloat();
+        }
+        read.nextLine();
+        System.out.println("Que conjunto de parâmetros pretende utilizar?");
+        chosenName = read.nextLine();
+        while (readChosenLine(names) < 0) {
+            System.out.println("Por favor, insira um nome válido.");
+            chosenName = read.nextLine();
+        }
+        System.out.println("Escolha um método numérico. Insira 1 para Euler e 2 para Runge-Kutta de 4ª ordem.");
+        option = read.nextInt();
+        while (option != 1 && option != 2) {
+            System.out.println("Por favor, insira um número válido.");
+            option = read.nextInt();
+        }
+    }
+
+    private static String[] scanFileNames(File file) throws FileNotFoundException {
+        Scanner scan = new Scanner(file);
+        scan.nextLine();
+        String[] initialNames = new String[999];
+        String parameters;
+        String[] values;
+        int x = 0;
+        do {
+            parameters = scan.nextLine();
+            parameters = parameters.replace(",", ".");
+            values = parameters.split(";");
+            initialNames[x] = values[0];
+            x++;
+        } while (scan.hasNextLine());
+        scan.close();
+        String[] names = new String[x];
+        System.arraycopy(initialNames, 0, names, 0, x);
+        return names;
+    }
+
+    private static double[][] scanFileValues(File file, String[] names) throws FileNotFoundException {
+        Scanner scan = new Scanner(file);
+        scan.nextLine();
+        double[][] matrix = new double[names.length][5];
+        String parameters;
+        String[] values;
+        double valueOfAlpha, valueOfBeta, valueOfGamma, valueOfRho;
+        for (int i = 0; i < names.length; i++) {
+            parameters = scan.nextLine();
+            parameters = parameters.replace(",", ".");
+            values = parameters.split(";");
+            valueOfBeta = Double.parseDouble(values[1]);
+            valueOfGamma = Double.parseDouble(values[2]);
+            valueOfRho = Double.parseDouble(values[3]);
+            valueOfAlpha = Double.parseDouble(values[4]);
+            matrix[i][1] = valueOfBeta;
+            matrix[i][2] = valueOfGamma;
+            matrix[i][3] = valueOfRho;
+            matrix[i][4] = valueOfAlpha;
+        }
+        scan.close();
+        return matrix;
+    }
+
+    private static int readChosenLine(String[] names) {
+        int chosenLine;
+        for (int i = 0; i < names.length; i++) {
+            if (names[i].equals(chosenName)) {
+                chosenLine = i;
+                return chosenLine;
+            }
+        }
+        return -1;
+    }
+
+    public static double functionS(double susceptible, double infected) {
+        return -beta * susceptible * infected;
+    }
+
+    public static double functionI(double susceptible, double infected, double recovered) {
+        return rho * beta * susceptible * infected - gamma * infected + alpha * recovered;
+    }
+
+    public static double functionR(double susceptible, double infected, double recovered) {
+        return gamma * infected - alpha * recovered + (1 - rho) * beta * susceptible * infected;
+    }
+
+    public static double[][] Euler() {
+        double susceptible = initialSusceptible;
+        double infected = initialInfected;
+        double recovered = initialRecovered;
+        double populationSize = initialPopulationSize;
+        double oldSusceptible = susceptible;
+        double oldInfected = infected;
+        double oldRecovered = recovered;
+        double[][] results = new double[numberOfDays][5];
+        for (int i = 0; i < numberOfDays; i++) {
+            results[i][0] = i;
+            results[i][1] = susceptible;
+            results[i][2] = infected;
+            results[i][3] = recovered;
+            results[i][4] = populationSize;
+            for (int j = 0; j < 1 / h; j++) {
+                susceptible += h * functionS(oldSusceptible, oldInfected);
+                infected += h * functionI(oldSusceptible, oldInfected, oldRecovered);
+                recovered += h * functionR(oldSusceptible, oldInfected, oldRecovered);
+                oldSusceptible = susceptible;
+                oldInfected = infected;
+                oldRecovered = recovered;
+            }
+            populationSize = susceptible + infected + recovered;
+        }
+        return results;
+    }
+
+    public static double[][] RK4() {
+        double susceptible = initialSusceptible;
+        double infected = initialInfected;
+        double recovered = initialRecovered;
+        double populationSize = initialPopulationSize;
+        double[][] results = new double[numberOfDays][5];
+        double[][] kSIR = new double[5][3];
+        for (int i = 0; i < numberOfDays; i++) {
+            results[i][0] = i;
+            results[i][1] = susceptible;
+            results[i][2] = infected;
+            results[i][3] = recovered;
+            results[i][4] = populationSize;
+            for (int j = 0; j < 1 / h; j++) {
+                calculationOfK(kSIR, susceptible, infected, recovered);
+                susceptible += kSIR[4][0];
+                infected += kSIR[4][1];
+                recovered += kSIR[4][2];
+            }
+            populationSize = susceptible + infected + recovered;
+        }
+        return results;
+    }
+
+    public static void calculationOfK(double[][] kSIR, double susceptible, double infected, double recovered) {
+        kSIR[0][0] = h * functionS(susceptible, infected);
+        kSIR[0][1] = h * functionI(susceptible, infected, recovered);
+        kSIR[0][2] = h * functionR(susceptible, infected, recovered);
+        double k1S = susceptible + kSIR[0][0] / 2;
+        double k1I = infected + kSIR[0][1] / 2;
+        double k1R = recovered + kSIR[0][2] / 2;
+        kSIR[1][0] = h * functionS(k1S, k1I);
+        kSIR[1][1] = h * functionI(k1S, k1I, k1R);
+        kSIR[1][2] = h * functionR(k1S, k1I, k1R);
+        double k2S = susceptible + kSIR[1][0] / 2;
+        double k2I = infected + kSIR[1][1] / 2;
+        double k2R = recovered + kSIR[1][2] / 2;
+        kSIR[2][0] = h * functionS(k2S, k2I);
+        kSIR[2][1] = h * functionI(k2S, k2I, k2R);
+        kSIR[2][2] = h * functionR(k2S, k2I, k2R);
+        double k3S = susceptible + kSIR[2][0];
+        double k3I = infected + kSIR[2][1];
+        double k3R = recovered + kSIR[2][2];
+        kSIR[3][0] = h * functionS(k3S, k3I);
+        kSIR[3][1] = h * functionI(k3S, k3I, k3R);
+        kSIR[3][2] = h * functionR(k3S, k3I, k3R);
+        kSIR[4][0] = (kSIR[0][0] + 2 * kSIR[1][0] + 2 * kSIR[2][0] + kSIR[3][0]) / 6;
+        kSIR[4][1] = (kSIR[0][1] + 2 * kSIR[1][1] + 2 * kSIR[2][1] + kSIR[3][1]) / 6;
+        kSIR[4][2] = (kSIR[0][2] + 2 * kSIR[1][2] + 2 * kSIR[2][2] + kSIR[3][2]) / 6;
+    }
+
+    public static String choosingMethod(int option) {
+        String methodName;
+        switch (option) {
+            case 1:
+                methodName = "Euler";
+                break;
+            case 2:
+                methodName = "RK4";
+                break;
+            default:
+                return "";
+        }
+        return methodName;
+    }
+
+    private static void readNIMethod(String[] args) {
+        for (int i = 1; i < args.length; i++) {
+            if (args[i - 1].equals("-m")) {
+                option = Integer.parseInt(args[i]);
+            }
+        }
+    }
+
+    private static void readNIh(String[] args) {
+        for (int i = 1; i < args.length; i++) {
+            if (args[i - 1].equals("-p")) {
+                h = Double.parseDouble(args[i]);
+            }
+        }
+    }
+
+    private static void readNIpopulationSize(String[] args) {
+        for (int i = 1; i < args.length; i++) {
+            if (args[i - 1].equals("-t")) {
+                initialPopulationSize = Integer.parseInt(args[i]);
+            }
+        }
+    }
+
+    private static void readNInumberOfDays(String[] args) {
+        for (int i = 1; i < args.length; i++) {
+            if (args[i - 1].equals("-d")) {
+                numberOfDays = Integer.parseInt(args[i]);
+            }
+        }
+    }
+
+    public static String hNumbersInString() {
+        String[] array = String.valueOf(h).split(".");
+        return array[0] + array[1];
+    }
+
+    public static String[] creatingOutputArray(String methodName, double[][] matrixEuler, double[][] matrixRK4, String[] names, String[] args, int i, boolean interactive) throws FileNotFoundException {
+        String[] output = new String[numberOfDays + 1];
+        if (methodName.equals("Euler")) {
+            output[0] = "Dia;S;I;R;N";
+            for (int j = 0; j < matrixEuler.length; j++) {
+                output[j + 1] = j + ";";
+                for (int k = 1; k < matrixEuler[j].length; k++) {
+                    if (k < matrixEuler[j].length - 1) {
+                        output[j + 1] += matrixEuler[j][k] + ";";
+                    } else {
+                        output[j + 1] += matrixEuler[j][k];
+                    }
+                }
+            }
+        } else if (methodName.equals("RK4")) {
+            output[0] = "Dia;S;I;R;N";
+            for (int j = 0; j < matrixRK4.length; j++) {
+                output[j + 1] = j + ";";
+                for (int k = 1; k < matrixRK4[j].length; k++) {
+                    if (k < matrixRK4[j].length - 1) {
+                        output[j + 1] += matrixRK4[j][k] + ";";
+                    } else {
+                        output[j + 1] += matrixRK4[j][k];
+                    }
+                }
+            }
+        } else {
+            outputToCsvFile(creatingOutputArray(choosingMethod(option), matrixEuler, matrixRK4, names, args, i, interactive), names, args, i, interactive);
+        }
+        return output;
+    }
+
+    public static void outputToCsvFile(String[] output, String[] names, String[] args, int i, boolean interactive) throws FileNotFoundException {
+        File outputFile = new File(".\\ficheiroResultado.csv");
+        PrintWriter printWriter = new PrintWriter(outputFile);
+        for (int j = 0; j < output.length; j++) {
+            printWriter.println(output[j]);
+        }
+        printWriter.close();
+    }
+
+    public static File generateFiles(String[] names, int i) {
+        File outputFile = new File(names[i] + "m" + option + "p" + hNumbersInString() + "t" + initialPopulationSize + "d" + numberOfDays + ".csv");
+        return outputFile;
+    }
+
+    private static void comandos() {
+        String[] cmd = new String[9];
+        cmd[0] = "reset\n";
+        cmd[1] = "set terminal pngcairo size 1000,500\n";
+        cmd[2] = "set output 'grafico.png'\n";
+        cmd[3] = "set datafile separator ';'\n";
+        cmd[4] = "set title 'Propagação de uma notícia falsa'\n";
+        cmd[5] = "set xlabel 'Número de dias'\n";
+        cmd[6] = "set ylabel 'População'\n";
+        cmd[7] = "plot '.\\ficheiroResultado.csv' every ::1 using 1:2 smooth bezier lw 4 title 'S','.\\ficheiroResultado.csv' every ::1 using 1:3 smooth bezier lw 4 title 'I' ,'.\\ficheiroResultado.csv' every ::1 using 1:4 smooth bezier lw 4 title 'R'\n";
+        cmd[8] = "exit";
+        grafico(cmd);
+    }
+
+    private static void grafico(String[] cmd) {
+        try {
+            Process p = Runtime.getRuntime().exec("gnuplot.exe");
+            OutputStream outputStream = p.getOutputStream();
+            PrintWriter write = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream)));
+            for (int i = 0; i < cmd.length; i++) {
+                write.println(cmd[i]);
+                write.flush();
+            }
+            write.close();
+        } catch (Exception x) {
+            System.out.println(x.getMessage());
+        }
+    }
+}
